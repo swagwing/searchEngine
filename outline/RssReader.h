@@ -3,17 +3,17 @@
 #include <vector>
 #include <regex>
 #include <fstream>
-#include <sstream>
-#include "../../include/tinyxml2.h"
+#include "../include/tinyxml2.h"
 using namespace std;
 using namespace tinyxml2;
 
 namespace sr
 {
-struct RssItem
-{ 
+
+struct MyPage
+{
     string title;
-    string link;
+    string url;
     string description;
     string content;
 };
@@ -21,10 +21,12 @@ struct RssItem
 class RssReader
 {
 public:
-    RssReader();
-    void pareRss(); //解析
-    void dump(const string&);
+    RssReader(const string&);
+    void parseRss();
+    void dump(const string&,const string&);
 private:
-    vector<RssItem> _rss;
+    vector<MyPage> _rss;
+    vector<string> _xml;
 };
-}// end of namespace sr
+
+}//end of namespace sr

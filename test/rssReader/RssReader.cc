@@ -11,37 +11,72 @@ RssReader::RssReader()
 void RssReader::pareRss()
 {
     XMLDocument doc;
-    doc.LoadFile("./coolshell.xml");
-    XMLNode *pinit = doc.FirstChildElement("rss")->FirstChildElement("channel")->FirstChildElement("item");
-    XMLNode *pnode = pinit;
-    XMLText *ptxt;
+    doc.LoadFile("./mifengtd.xml");
+    cout << "LoadFile finished" << endl;
+    XMLElement* root = doc.RootElement();
+    XMLElement* channel = root->FirstChildElement("channel");
+    if(channel == nullptr){
+        cout << "fail to get channel" << endl;
+    }
+    XMLNode *pnode = channel->FirstChildElement("item");
     string title,link,description,content,res;
-    regex r1("<.*");
-    regex r2("<.*?>");
+    regex re("<[^>]*>");
     while(pnode)
     {
+        cout << "enter while" << endl;
         RssItem* pRss = new RssItem;
-        ptxt = pnode->FirstChildElement("title")->FirstChild()->ToText();
-        title = ptxt->Value();
-        pRss->title = title;
+        XMLElement* ptitle = pnode->FirstChildElement("title");
+        if(ptitle && ptitle->GetText()!= nullptr){
+            title = ptitle->GetText();
+        }else{
+            title = string();
+        }
+        cout << "after title" << endl;
 
-        ptxt = pnode->FirstChildElement("link")->FirstChild()->ToText();
-        link = ptxt->Value();
+        XMLElement* plink = pnode->FirstChildElement("link");
+        if(plink && plink->GetText()!=nullptr){
+            link = plink->GetText();
+        }else{
+            link = string();
+        }
         pRss->link = link;
+        cout << "after link" << endl;
 
-        ptxt = pnode->FirstChildElement("description")->FirstChild()->ToText();
-        description = ptxt->Value();
-        description = regex_replace(description,r1,"");
+        XMLElement* pdescription = pnode->FirstChildElement("description");
+        if(pdescription && pdescription->GetText()!=nullptr){
+            description = pdescription->GetText();
+            description = regex_replace(description,re,"");
+        }else{
+            description = string();
+        }
         pRss->description = description;
+        cout << "after description" << endl;
 
-        ptxt = pnode->FirstChildElement("content:encoded")->FirstChild()->ToText();
-        content = ptxt->Value();
-        content = regex_replace(content,r2,"");
+        XMLElement* pcontent = pnode->FirstChildElement("content:encoded");
+        if(pcontent && pcontent->GetText()!=nullptr){
+            content = pcontent->GetText();
+            content = regex_replace(content,re,"");
+        }
         pRss->content = content;
+        cout << "after content" << endl;
+
+        if(title == string()){
+            if(description != string()){
+                stringstream ss(description);
+                getline(ss,title);
+            }else{
+                if(content != string()){
+                    stringstream ss(content);
+                    getline(ss,content);
+                }
+            }
+        }
+        pRss->title = title;
 
         pnode = pnode->NextSibling();
         _rss.push_back(*pRss);
     }
+    cout << "extract finished." << endl;
 }
 
 void RssReader::dump(const string& filename)
