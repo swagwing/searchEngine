@@ -1,9 +1,9 @@
-#include "RssReader.h"
+#include "PageLibPreprocessor.h"
 
 namespace sr
 {
 
-RssReader::RssReader(const string& confname)
+PageLibPreprocessor::PageLibPreprocessor(const string& confname)
 {
     ifstream ifs;
     ifs.open(confname);
@@ -14,7 +14,7 @@ RssReader::RssReader(const string& confname)
     _rss = *(new vector<MyPage>);
 }
 
-void RssReader::parseRss()
+void PageLibPreprocessor::parseRss()
 {
     for(auto &xml:_xml)
     {
@@ -89,7 +89,7 @@ void RssReader::parseRss()
     }
 }
 
-void RssReader::dump(const string& ripeName,const string& offsetName)
+void PageLibPreprocessor::store(const string& ripeName,const string& offsetName)
 {
     cout << ">>ripeName " << ripeName << endl;
     cout << ">>offsetName" << offsetName << endl;

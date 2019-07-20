@@ -18,12 +18,12 @@ struct MyPage
     string content;
 };
 
-class RssReader
+class PageLibPreprocessor
 {
 public:
-    RssReader(const string&);
+    PageLibPreprocessor(const string&);
     void parseRss();
-    void dump(const string&,const string&);
+    void store(const string&,const string&);
 private:
     vector<MyPage> _rss;
     vector<string> _xml;
