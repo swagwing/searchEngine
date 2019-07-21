@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <map>
 #include "../include/simhash/include/simhash/Simhasher.hpp"
 using namespace std;
 using namespace simhash;

@@ -1,9 +1,11 @@
-#include "RssReader.h"
+#include "PageLibPreprocessor.h"
 
 int main()
 {
-    sr::RssReader rssReader("./config");
-    rssReader.parseRss();
-    rssReader.dump("newripepage.lib","offset.lib");
+    sr::PageLibPreprocessor pagepre("./config");
+    pagepre.parseRss();
+    pagepre.pageFilter();
+    pagepre.buildInvertIndex();
+    pagepre.store("ripepage.lib","offset.lib","invertIndex.lib");
     return 0;
 }

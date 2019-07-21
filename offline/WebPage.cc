@@ -5,18 +5,19 @@ namespace sr
 
 WebPage::WebPage(int id,const string& title,const string& url,const string& content)
     :_DocId(id)
-     ,_title(title)
-     ,_url(url)
+    ,_title(title)
+    ,_url(url)
      ,_content(content)
-    {}
-
-string WebPage::getDoc()
 {
     _txt = "<doc><docid>"+to_string(_DocId)+
         "</docid><url>"+_url+
         "</url><title>"+_title+
         "</title><content>"+_content+
         "</content></doc>";
+}
+
+string WebPage::getDoc()
+{
     return _txt;
 }
 
