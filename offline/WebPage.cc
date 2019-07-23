@@ -3,21 +3,19 @@
 namespace sr
 {
 
-WebPage::WebPage(int id,const string& title,const string& url,const string& content)
-    :_DocId(id)
-    ,_title(title)
+WebPage::WebPage(const string& title,const string& url,const string& content)
+    :_title(title)
     ,_url(url)
-     ,_content(content)
+    ,_content(content)
+{}
+
+string WebPage::getDoc(int docId)
 {
-    _txt = "<doc><docid>"+to_string(_DocId)+
+    _txt = "<doc><docid>"+to_string(docId)+
         "</docid><url>"+_url+
         "</url><title>"+_title+
         "</title><content>"+_content+
         "</content></doc>";
-}
-
-string WebPage::getDoc()
-{
     return _txt;
 }
 
@@ -29,8 +27,8 @@ void WebPage::builU64()
                         "../include/simhash/dict/stop_words.utf8");
     size_t topN = 5;
     vector<pair<string,double>> res;
-    simhasher.extract(_txt,res,topN); //提取关键词序列
-    simhasher.make(_txt,topN,_u64); //计算simhash值
+    simhasher.extract(_content,res,topN); //提取关键词序列
+    simhasher.make(_content,topN,_u64); //计算simhash值
 }
 
 bool WebPage::operator == (const WebPage& rhs)
@@ -40,6 +38,6 @@ bool WebPage::operator == (const WebPage& rhs)
 
 bool WebPage::operator < (const WebPage& rhs)
 {
-    return _DocId < rhs._DocId; //对文档按DocId排序
+    return _u64 < rhs._u64; //对文档按DocId排序
 }
 }//end of namespace sr

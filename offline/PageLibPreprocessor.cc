@@ -71,7 +71,6 @@ void PageLibPreprocessor::parseRss()
         }
         XMLElement* pnode = channel->FirstChildElement("item");
         string title,link,description,content,res;
-        int docId = 1;
         regex re("<[^>]*>");
         while(pnode)
         {
@@ -116,8 +115,7 @@ void PageLibPreprocessor::parseRss()
             }
 
             pnode = pnode->NextSiblingElement();
-            ++docId;
-            _rss.emplace_back(docId,title,link,content);
+            _rss.emplace_back(title,link,content);
         }
         cout << "extract finished." << endl;
     }
@@ -137,7 +135,7 @@ void PageLibPreprocessor::pageFilter()
     auto it = unique(_rss.begin(),_rss.end());
     _rss.erase(it,_rss.end());
     _N = _rss.size();
-    cout << "after pageFilter,the size of _rss" << _N << endl;
+    cout << "after pageFilter,the size of _rss:" << _N << endl;
 }
 
 void PageLibPreprocessor::buildInvertIndex()
@@ -149,10 +147,11 @@ void PageLibPreprocessor::buildInvertIndex()
                           STOP_WORD_PATH);
     vector<string> words;
     string line;
+    int docId = 1;
     for(auto& page:_rss)
     {
         map<string,int> iWords;
-        line = page.getDoc();
+        line = page.getDoc(docId);
         jieba.Cut(line,words,true);
         for(auto& word:words){
             if(is_chinese(word)){
@@ -164,8 +163,9 @@ void PageLibPreprocessor::buildInvertIndex()
             ++_words[w.first];
         }
         _wordPage.push_back(iWords);
+        ++docId;
     }
-    int docId = 1;
+    docId = 1;
     double tf,df;
     string curWord;
     for(auto& pword:_wordPage)
@@ -221,7 +221,7 @@ void PageLibPreprocessor::store(const string& ripeName,const string& offsetName,
     int id = 1;
     for(auto &c:_rss)
     {
-        txt = c.getDoc();
+        txt = c.getDoc(id);
         ofs1 << txt << endl;
         len = txt.size();
         offset = (int)ofs1.tellp() - len;

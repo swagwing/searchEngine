@@ -13,14 +13,13 @@ namespace sr
 class WebPage
 {
 public:
-    WebPage(int,const string&,const string&,const string&);
-    string getDoc();
+    WebPage(const string&,const string&,const string&);
+    string getDoc(int);
     void builU64();
     bool operator == (const WebPage&);
     bool operator < (const WebPage&);
 
 private:
-    int _DocId;
     string _title;
     string _url;
     string _content;
