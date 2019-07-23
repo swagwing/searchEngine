@@ -116,8 +116,8 @@ void PageLibPreprocessor::parseRss()
             }
 
             pnode = pnode->NextSiblingElement();
-            _rss.emplace_back(docId,title,link,content);
             ++docId;
+            _rss.emplace_back(docId,title,link,content);
         }
         cout << "extract finished." << endl;
     }
