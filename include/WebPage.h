@@ -7,20 +7,19 @@
 using namespace std;
 using namespace simhash;
 
-namespace wd
+namespace sr
 {
 
 class WebPage
 {
 public:
-    WebPage(int,const string&,const string&,const string&);
-    string getDoc();
+    WebPage(const string&,const string&,const string&);
+    string getDoc(int);
     void builU64();
     bool operator == (const WebPage&);
     bool operator < (const WebPage&);
 
 private:
-    int _DocId;
     string _title;
     string _url;
     string _content;
@@ -28,5 +27,5 @@ private:
     uint64_t _u64 = 0;
 };
 
-}//end of namespace wd
+}//end of namespace sr
 
