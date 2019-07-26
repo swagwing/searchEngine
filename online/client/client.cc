@@ -77,7 +77,7 @@ int main(int argc, const char *argv[])
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof addr);
     addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = inet_addr("192.168.233.130"); //localhost
+    addr.sin_addr.s_addr = inet_addr("192.168.233.132"); //localhost
     addr.sin_port = htons(2000);
     socklen_t len = sizeof addr;
     if(connect(peerfd, (struct sockaddr*)&addr, len) == -1)
@@ -97,8 +97,8 @@ int main(int argc, const char *argv[])
 int do_service(int sockfd)
 {
     train t;
-    char recvbuf[1000] = {0};
-    char sendbuf[1000] = {0};
+    char recvbuf[65536] = {0};
+    char sendbuf[65535] = {0};
     while(1)
     {
         int ret;
@@ -121,11 +121,7 @@ int do_service(int sockfd)
             close(sockfd);
             exit(EXIT_SUCCESS);
         }
-        Json::Reader reader;
-        Json::Value json_object;
-        if(!reader.parse(recvbuf,json_object))
-            return 0;
-        cout << json_object["word_candidate"] << endl;
+        cout << "recvBuf: " << recvbuf << endl;
         memset(recvbuf, 0, sizeof recvbuf);
         memset(sendbuf, 0, sizeof sendbuf);
     }

@@ -1,6 +1,6 @@
 #include "../../include/WebPage.h"
 
-namespace sr
+namespace wd
 {
 
 WebPage::WebPage(const string& title,const string& url,const string& content)
@@ -9,35 +9,44 @@ WebPage::WebPage(const string& title,const string& url,const string& content)
     ,_content(content)
 {}
 
-string WebPage::getDoc(int docId)
+string WebPage::getTitle()
 {
-    _txt = "<doc><docid>"+to_string(docId)+
-        "</docid><url>"+_url+
-        "</url><title>"+_title+
-        "</title><content>"+_content+
-        "</content></doc>";
-    return _txt;
+    return _title;
 }
 
-void WebPage::builU64()
+string WebPage::getUrl()
 {
-    Simhasher simhasher("../include/simhash/dict/jieba.dict.utf8",
-                        "../include/simhash/dict/hmm_model.utf8",
-                        "../include/simhash/dict/idf.utf8",
-                        "../include/simhash/dict/stop_words.utf8");
-    size_t topN = 5;
-    vector<pair<string,double>> res;
-    simhasher.extract(_content,res,topN); //提取关键词序列
-    simhasher.make(_content,topN,_u64); //计算simhash值
+    return _url;
 }
 
-bool WebPage::operator == (const WebPage& rhs)
+string WebPage::getContent()
 {
-    return Simhasher::isEqual(_u64,rhs._u64);
+    return _content;
 }
 
-bool WebPage::operator < (const WebPage& rhs)
+string WebPage::getSummary(const vector<string>& queryWords)
 {
-    return _u64 < rhs._u64; //对文档按DocId排序
+    string summary,tmp;
+    stringstream ss(_content);
+    getline(ss,tmp);
+    char buf[200];
+    bzero(buf,200);
+    while(ss.read(buf,150))
+    {
+        tmp = buf;
+        bzero(buf,200);
+        for(auto& w:queryWords)
+        {
+            if(tmp.find(w) != string::npos){
+                tmp = "..." + tmp +"...";
+                if(summary.size()){
+                    summary = summary + "\n" +tmp;
+                }
+                else
+                    summary += tmp;
+            }
+        }
+    }
+    return summary;
 }
-}//end of namespace sr
+}//end of namespace wd

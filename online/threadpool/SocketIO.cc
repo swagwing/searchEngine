@@ -1,4 +1,5 @@
 #include "../../include/SocketIO.h"
+#include <iostream>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -6,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+using namespace std;
 namespace wd
 {
 
@@ -94,4 +96,37 @@ int SocketIO::writen(const char * buff, int len)
 	return len - left;
 }
 
+int SocketIO::send_cycle(const char* buf,int len)
+{
+    int total = 0;
+    int ret;
+    while(total < len)
+    {
+        ret = send(_fd,buf+total,len-total,0);
+        if(-1 == ret)
+        {
+            cout << "errno = " << errno << endl;
+            return -1;
+        }
+        total = total + ret;
+    }
+    return 0;
+}
+
+int SocketIO::recv_cyle(char* buf,int len)
+{
+    int total = 0;
+    int ret;
+    while(total< len)
+    {
+        ret = recv(_fd,buf+total,len-total,0);
+        total = total + ret;
+    }
+    return 0;
+}
+
 }//end of namespace wd
+
+
+
+

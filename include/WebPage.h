@@ -1,31 +1,28 @@
 #pragma once
-#include <string>
+#include <string.h>
 #include <iostream>
+#include <sstream>
 #include <vector>
-#include <map>
-#include "../include/simhash/include/simhash/Simhasher.hpp"
+#include <json/json.h>
 using namespace std;
-using namespace simhash;
 
-namespace sr
+namespace wd
 {
 
 class WebPage
 {
 public:
     WebPage(const string&,const string&,const string&);
-    string getDoc(int);
-    void builU64();
-    bool operator == (const WebPage&);
-    bool operator < (const WebPage&);
+    string getTitle();
+    string getUrl();
+    string getContent();
+    string getSummary(const vector<string>&);
 
 private:
     string _title;
     string _url;
     string _content;
-    string _txt;
-    uint64_t _u64 = 0;
 };
 
-}//end of namespace sr
+}//end of namespace wd
 

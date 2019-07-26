@@ -1,11 +1,20 @@
+ ///
+ /// @file    TcpConnection.cc
+ /// @author  lemon(haohb13@gmail.com)
+ /// @date    2019-05-07 17:12:51
+ ///
+ 
+
 #include "../../include/TcpConnection.h"
 #include "../../include/InetAddress.h"
 #include "../../include/EventLoop.h"
 #include <errno.h>
 #include <stdlib.h>
 #include <sys/socket.h>
-
+#include <iostream>
 #include <sstream>
+#include <string.h>
+using namespace std;
 
 namespace wd
 {
@@ -28,14 +37,19 @@ TcpConnection::~TcpConnection()
 
 string TcpConnection::receive()
 {
-	char buff[65536] = {0};
-	_socketIo.readline(buff, sizeof(buff));
+	char buff[1000] = {0};
+    int data_len;
+    _socketIo.recv_cyle((char*)&data_len,4);
+    _socketIo.recv_cyle(buff,data_len);
 	return string(buff);
 }
 	
 void TcpConnection::send(const string & msg)
 {
-	_socketIo.writen(msg.c_str(), msg.size());
+    train t;
+    strcpy(t.buf,msg.c_str());
+    t.dataLen = msg.size();
+	_socketIo.send_cycle((char*)&t,4+t.dataLen);
 }
 
 void TcpConnection::sendInLoop(const string & msg)
