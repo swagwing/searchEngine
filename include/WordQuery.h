@@ -5,10 +5,13 @@
 #include "WebPage.h"
 #include <queue>
 #include <iostream>
-#include <set>
 #include <json/json.h>
 #include <unordered_map>
-//#include <math.h>
+#include <sstream>
+#include <math.h>
+#include <vector>
+#include <string>
+#include <algorithm>
 using namespace std;
 
 namespace wd
@@ -30,7 +33,7 @@ private:
     MyConf* _conf;
     TcpConnectionPtr _conn;
     string _queryWord; //等查询的单词
-    vector<WebPage> _pageLib;
+    unordered_map<int,WebPage> _pageLib;
     unordered_map<int,pair<int,int>> _offsetLib;
     unordered_map<string,set<pair<int,double>>> _invertIndexTable;
     map<string,double> _queryWeights;

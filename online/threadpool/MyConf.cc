@@ -31,23 +31,29 @@ map<string,string>& MyConf::getConfigMap()
     while(ifs >> str1 >> str2){
         _configMap.insert(make_pair(str1,str2));
     }
+#if 0
+    cout << "test _configMap: " << endl;
+    for(auto& it:_configMap)
+    {
+        cout << it.first << " " << it.second << endl;
+    }
+#endif
     return _configMap;
 }
 
 set<string> MyConf::getStopWordList()
 {
     string stopWordPath = _pInstance->getConfigMap().find("stopPath")->second;
+    cout << stopWordPath << endl;
     ifstream ifs(stopWordPath);
     string str;
     while(ifs >> str)
     {
         _stopWordList.insert(str);
     }
-    cout << "停用词：" << endl;
-    for(auto &it:_stopWordList)
-        cout << it << endl;
     return _stopWordList;
 }
 
 MyConf* MyConf::_pInstance = nullptr;
+
 }//end of namespace wd

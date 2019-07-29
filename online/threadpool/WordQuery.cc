@@ -4,7 +4,7 @@
 
 namespace wd
 {
-#if 0
+
 const char* const DICT_PATH = "../../include/cppjieba/dict/jieba.dict.utf8";
 const char* const HMM_PATH = "../../include/cppjieba/dict/hmm_model.utf8";
 const char* const USER_DICT_PATH = "../../include/cppjieba/dict/user.dict.utf8";
@@ -38,7 +38,7 @@ struct MyCompare
     }
     map<string,double> _weights;
 };
-#endif
+
 WordQuery::WordQuery(const string& queryWord,const TcpConnectionPtr& conn,MyConf* conf)
     :_conf(conf)
     ,_conn(conn)
@@ -46,7 +46,7 @@ WordQuery::WordQuery(const string& queryWord,const TcpConnectionPtr& conn,MyConf
 {
     cout << "create finished." << endl;
 }
-#if 0
+
 void WordQuery::loadLibrary()
 {
     ifstream ifs1,ifs2,ifs3;
@@ -54,49 +54,59 @@ void WordQuery::loadLibrary()
     int docId,offset,len;
     while(ifs2>>docId>>offset>>len)
     {
-        _offsetLib.emplace(docId,offset,len); //未经测试
+        _offsetLib.emplace(docId,make_pair(offset,len)); //未经测试
     }
     ifs2.close();
+    cout << "after ifs2,if2 is right" << endl;
 
     ifs3.open(_conf->getConfigMap().find("indexPath")->second);
-    string word;
+    string line,word;
     double weight;
-    while(ifs3>>word>>docId>>weight)
+    while(getline(ifs3,line))
     {
-        _invertIndexTable.emplace(word,docId,weight);
+        stringstream ss(line);
+        ss >> word;
+        while(ss>>docId>>weight)
+        {
+            _invertIndexTable[word].insert(make_pair(docId,weight));
+        }
     }
     ifs3.close();
-
+    cout << "after ifs3,ifs3 is right" << endl;
     ifs1.open(_conf->getConfigMap().find("pagePath")->second);
     string txt,title,url,content;
     for(auto& off:_offsetLib)
     {
+        int id = off.first;
         offset = off.second.first;
         len = off.second.second;
-        char buf[65535] = {0};
-        ifs3.seekg(offset,ifs3.beg);
-        ifs3.read(buf,len);
+        char buf[102400] = {0};
+        ifs1.seekg(offset,ifs3.beg);
+        ifs1.read(buf,len);
         txt = buf;
-        int sbeg = txt.find("<title>")+7;
-        int send = txt.find("</title>",sbeg);
-        title = txt.substr(sbeg,send-sbeg);
-        sbeg = txt.find("<url>")+5;
-        send = txt.find("</url>",sbeg);
+        int sbeg = txt.find("<url>")+5;
+        int send = txt.find("</url>",sbeg);
         url = txt.substr(sbeg,send-sbeg);
+        sbeg = txt.find("<title>")+7;
+        send = txt.find("</title>",sbeg);
+        title = txt.substr(sbeg,send-sbeg);
         sbeg = txt.find("<content>")+9;
         send = txt.find("</content>",sbeg);
         content = txt.substr(sbeg,send-sbeg);
-        _pageLib.emplace_back(title,url,content);
+        WebPage myWeb(title,url,content);
+        _pageLib.insert(make_pair(id,myWeb));
     }
     ifs1.close();
-
+    cout << "after ifs1" << endl;
+    _conf->getConfigMap();
     _stopWordsLib = _conf->getStopWordList();
 }
-#endif
 string WordQuery::doQuery()
 {
-#if 0
+    cout << "before doQuery" << endl;
     loadLibrary();
+    cout << "after doQuery" << endl;
+#if 1 
     cppjieba::Jieba jieba(DICT_PATH,
                           HMM_PATH,
                           USER_DICT_PATH,
@@ -139,7 +149,9 @@ string WordQuery::doQuery()
                 if(p.first == d)
                     weight = p.second;
             }
-            resultVector.emplace_back(d,w,weight);
+            map<string,double> mm;
+            mm[w] = weight;
+            resultVector.emplace_back(make_pair(d,mm));
         }
     }
     MyCompare mcp(_queryWeights);
@@ -152,18 +164,16 @@ string WordQuery::doQuery()
     string response = createJson(resultIds,uniqueQueryWords);
     return response;
 #endif
-    string str = "hi,baby,just test.";
-    return str;
 }
 
+//thid function no problem
 void WordQuery::sendResponce()
 {
-    cout << "enter WordQuery::sendResponce" << endl;
     string response = doQuery();
     cout << "response: " << response << endl;
     _conn->sendInLoop(response);
 }
-#if 0
+
 vector<double> WordQuery::getQueryWordsWeight(vector<string>& querywords)
 {
     map<string,int> queryMap;
@@ -205,22 +215,28 @@ vector<int> WordQuery::getDocIds(const vector<string>& words)
                          rhs.begin(),rhs.end(),back_inserter(tmp));
         result.swap(tmp);
     }
+    cout << "test WordQuery::getDocIds " << endl;
+    for(auto &it : result)
+    {
+        cout << it << endl;
+    }
     return result;
 }
-
+#if 1
 string WordQuery::createJson(vector<int>& docIds,vector<string>& querywords)
 {
     Json::Value result;
     int maxCnt = 0;
     for(auto id:docIds)
     {
-        if(maxCnt > 10)
+        if(maxCnt > 0)
             break;
         Json::Value tmp;
-        tmp["title"] = _pageLib[id-1].getTitle();
-        tmp["summary"] = _pageLib[id-1].getSummary(querywords);
-        tmp["url"] = _pageLib[id-1].getUrl();
-        tmp["content"] = _pageLib[id-1].getContent();
+        WebPage iPage = _pageLib[id];
+        tmp["title"] = iPage.getTitle();
+        tmp["summary"] = iPage.getSummary(querywords); //getSummsary不对
+        tmp["url"] = iPage.getUrl();
+        tmp["content"] = iPage.getContent();
         result["webpage"].append(tmp);
         ++maxCnt;
     }
@@ -228,7 +244,9 @@ string WordQuery::createJson(vector<int>& docIds,vector<string>& querywords)
     string response = fast_writer.write(result);
     return response;
 }
+#endif
 
+//this function no problem
 string WordQuery::returnNoAnswer()
 {
     Json::Value result,tmp;
@@ -241,5 +259,4 @@ string WordQuery::returnNoAnswer()
     string response = fast_writer.write(result);
     return response;
 }
-#endif
 }//end of namespace wd

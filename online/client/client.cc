@@ -97,8 +97,8 @@ int main(int argc, const char *argv[])
 int do_service(int sockfd)
 {
     train t;
-    char recvbuf[65536] = {0};
-    char sendbuf[65535] = {0};
+    char recvbuf[102400] = {0};
+    char sendbuf[102400] = {0};
     while(1)
     {
         int ret;
