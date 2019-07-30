@@ -77,11 +77,10 @@ void WordQuery::loadLibrary()
     string txt,title,url,content;
     for(auto& off:_offsetLib)
     {
-        int id = off.first;
         offset = off.second.first;
         len = off.second.second;
         char buf[102400] = {0};
-        ifs1.seekg(offset,ifs3.beg);
+        ifs1.seekg(offset,ifs1.beg);
         ifs1.read(buf,len);
         txt = buf;
         int sbeg = txt.find("<url>")+5;
@@ -93,10 +92,12 @@ void WordQuery::loadLibrary()
         sbeg = txt.find("<content>")+9;
         send = txt.find("</content>",sbeg);
         content = txt.substr(sbeg,send-sbeg);
-        WebPage myWeb(title,url,content);
-        _pageLib.insert(make_pair(id,myWeb));
+        _pageLib.emplace_back(title,url,content);
     }
     ifs1.close();
+    cout << _pageLib[0].getTitle() << endl;
+    cout << _pageLib[1].getTitle() << endl;
+    cout << _pageLib[150].getTitle() << endl;
     cout << "after ifs1" << endl;
     _conf->getConfigMap();
     _stopWordsLib = _conf->getStopWordList();
@@ -232,7 +233,7 @@ string WordQuery::createJson(vector<int>& docIds,vector<string>& querywords)
         if(maxCnt > 0)
             break;
         Json::Value tmp;
-        WebPage iPage = _pageLib[id];
+        WebPage iPage = _pageLib[id-1];
         tmp["title"] = iPage.getTitle();
         tmp["summary"] = iPage.getSummary(querywords); //getSummsary不对
         tmp["url"] = iPage.getUrl();

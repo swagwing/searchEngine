@@ -33,8 +33,8 @@ private:
     MyConf* _conf;
     TcpConnectionPtr _conn;
     string _queryWord; //等查询的单词
-    unordered_map<int,WebPage> _pageLib;
-    unordered_map<int,pair<int,int>> _offsetLib;
+    vector<WebPage> _pageLib;
+    map<int,pair<int,int>> _offsetLib;
     unordered_map<string,set<pair<int,double>>> _invertIndexTable;
     map<string,double> _queryWeights;
     set<string> _stopWordsLib;
