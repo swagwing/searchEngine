@@ -13,7 +13,7 @@ namespace wd
 struct train
 {
     int dataLen;
-    char buf[1000];
+    char buf[655350];
 };
 
 class SocketIO

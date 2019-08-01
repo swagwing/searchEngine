@@ -110,7 +110,7 @@ int SocketIO::send_cycle(const char* buf,int len)
         }
         total = total + ret;
     }
-    return 0;
+    return ret;
 }
 
 int SocketIO::recv_cyle(char* buf,int len)
@@ -122,7 +122,7 @@ int SocketIO::recv_cyle(char* buf,int len)
         ret = recv(_fd,buf+total,len-total,0);
         total = total + ret;
     }
-    return 0;
+    return ret;
 }
 
 }//end of namespace wd

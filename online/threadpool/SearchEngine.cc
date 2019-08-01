@@ -11,18 +11,17 @@ SearchEngine::SearchEngine(const string& cfgFileName)
 void SearchEngine::onConnection(const TcpConnectionPtr& conn)
 {
     cout << conn->toString() << "has Connected!" << endl;
-    conn->send("welcome to server.");
 }
 
 void SearchEngine::onMessage(const TcpConnectionPtr& conn)
 {
     cout << "onMessage...." << endl;
     string msg = conn ->receive();
+    if(msg.back() == '\n')
+        msg.back() = 0;
     cout << ">> receive msg from client: " << msg << endl;
     WordQuery task(msg,conn,_conf);
-    cout << "111" << endl;
     _threadpool.addTask(std::bind(&WordQuery::sendResponce,task));
-    cout << "222" << endl;
 }
 
 void SearchEngine::onClose(const TcpConnectionPtr& conn)

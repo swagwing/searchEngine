@@ -57,7 +57,6 @@ void WordQuery::loadLibrary()
         _offsetLib.emplace(docId,make_pair(offset,len)); //未经测试
     }
     ifs2.close();
-    cout << "after ifs2,if2 is right" << endl;
 
     ifs3.open(_conf->getConfigMap().find("indexPath")->second);
     string line,word;
@@ -72,7 +71,7 @@ void WordQuery::loadLibrary()
         }
     }
     ifs3.close();
-    cout << "after ifs3,ifs3 is right" << endl;
+
     ifs1.open(_conf->getConfigMap().find("pagePath")->second);
     string txt,title,url,content;
     for(auto& off:_offsetLib)
@@ -95,19 +94,14 @@ void WordQuery::loadLibrary()
         _pageLib.emplace_back(title,url,content);
     }
     ifs1.close();
-    cout << _pageLib[0].getTitle() << endl;
-    cout << _pageLib[1].getTitle() << endl;
-    cout << _pageLib[150].getTitle() << endl;
-    cout << "after ifs1" << endl;
+
     _conf->getConfigMap();
     _stopWordsLib = _conf->getStopWordList();
 }
 string WordQuery::doQuery()
 {
-    cout << "before doQuery" << endl;
     loadLibrary();
-    cout << "after doQuery" << endl;
-#if 1 
+    cout << "loadLibrary finished." << endl;
     cppjieba::Jieba jieba(DICT_PATH,
                           HMM_PATH,
                           USER_DICT_PATH,
@@ -115,12 +109,16 @@ string WordQuery::doQuery()
                           STOP_WORD_PATH);
     vector<string> querywordsAll,querywords;
     jieba.Cut(_queryWord,querywordsAll,true);
+    cout << "querywordsAll: " << endl;
+    cout << querywordsAll << endl;
     for(auto& a:querywordsAll)
     {
         auto it = _stopWordsLib.find(a);
-        if(it == _stopWordsLib.end())
+        if(it == _stopWordsLib.end() && (a.size()!=1))
             querywords.push_back(a);
     }
+    cout << "after stopWordsLib,querywords: " << endl;
+    cout << querywords << endl;  
     if(querywords.size() == 0)
         return returnNoAnswer();
     vector<double> queryWordsWeight = getQueryWordsWeight(querywords);
@@ -164,15 +162,16 @@ string WordQuery::doQuery()
     }
     string response = createJson(resultIds,uniqueQueryWords);
     return response;
-#endif
 }
 
 //thid function no problem
 void WordQuery::sendResponce()
 {
     string response = doQuery();
-    cout << "response: " << response << endl;
-    _conn->sendInLoop(response);
+    int sz = response.size();
+    string message(to_string(sz));
+    message.append("\n").append(response);
+    _conn->sendInLoop(message);
 }
 
 vector<double> WordQuery::getQueryWordsWeight(vector<string>& querywords)
@@ -230,7 +229,7 @@ string WordQuery::createJson(vector<int>& docIds,vector<string>& querywords)
     int maxCnt = 0;
     for(auto id:docIds)
     {
-        if(maxCnt > 0)
+        if(maxCnt > 50)
             break;
         Json::Value tmp;
         WebPage iPage = _pageLib[id-1];
@@ -238,12 +237,13 @@ string WordQuery::createJson(vector<int>& docIds,vector<string>& querywords)
         tmp["summary"] = iPage.getSummary(querywords); //getSummsary不对
         tmp["url"] = iPage.getUrl();
         tmp["content"] = iPage.getContent();
-        result["webpage"].append(tmp);
+        result["files"].append(tmp);
         ++maxCnt;
     }
-    Json::FastWriter fast_writer;
-    string response = fast_writer.write(result);
-    return response;
+    //Json::FastWriter fast_writer;
+    //string response = fast_writer.write(result);
+    Json::StyledWriter style_writer;
+    return style_writer.write(result);
 }
 #endif
 
@@ -255,9 +255,10 @@ string WordQuery::returnNoAnswer()
     tmp["summary"] = "Sorry,I cann't what you want.Please search something else.";
     tmp["url"] = "";
     tmp["content"] = "";
-    result["webpage"].append(tmp);
-    Json::FastWriter fast_writer;
-    string response = fast_writer.write(result);
-    return response;
+    result["files"].append(tmp);
+    //Json::FastWriter fast_writer;
+    //string response = fast_writer.write(result);
+    Json::StyledWriter style_writer;
+    return style_writer.write(result);
 }
 }//end of namespace wd

@@ -20,7 +20,7 @@
 struct train
 {
     int dataLen;
-    char buf[1000];
+    char buf[655350];
 };
 
 using namespace std;
@@ -97,8 +97,8 @@ int main(int argc, const char *argv[])
 int do_service(int sockfd)
 {
     train t;
-    char recvbuf[102400] = {0};
-    char sendbuf[102400] = {0};
+    char recvbuf[1024000] = {0};
+    char sendbuf[1024000] = {0};
     while(1)
     {
         int ret;
