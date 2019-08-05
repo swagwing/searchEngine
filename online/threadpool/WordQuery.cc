@@ -4,7 +4,6 @@
 
 namespace wd
 {
-
 const char* const DICT_PATH = "../../include/cppjieba/dict/jieba.dict.utf8";
 const char* const HMM_PATH = "../../include/cppjieba/dict/hmm_model.utf8";
 const char* const USER_DICT_PATH = "../../include/cppjieba/dict/user.dict.utf8";
@@ -102,6 +101,17 @@ string WordQuery::doQuery()
 {
     loadLibrary();
     cout << "loadLibrary finished." << endl;
+    if(_queryWord.size()==0){
+        return returnNoAnswer();
+    }
+    cout << "before predis" << endl;
+    string ret = predis->get(_queryWord);
+    if(ret != "-1"){
+        cout << "缓存命中" << endl;
+        return ret;
+    }
+    cout << "after redis" << endl;
+    cout << "缓存未命中，进行计算" << endl;
     cppjieba::Jieba jieba(DICT_PATH,
                           HMM_PATH,
                           USER_DICT_PATH,
@@ -119,8 +129,11 @@ string WordQuery::doQuery()
     }
     cout << "after stopWordsLib,querywords: " << endl;
     cout << querywords << endl;  
-    if(querywords.size() == 0)
-        return returnNoAnswer();
+    if(querywords.size() == 0){
+        string response = returnNoAnswer();
+        predis->set(_queryWord,response);
+        return response;
+    }
     vector<double> queryWordsWeight = getQueryWordsWeight(querywords);
     double sumWeights = 0;
     for(auto& w:queryWordsWeight)
@@ -134,8 +147,11 @@ string WordQuery::doQuery()
         uniqueQueryWords.push_back(q.first);
     }
     vector<int> docIds = getDocIds(uniqueQueryWords);
-    if(docIds.size() == 0)
-        return returnNoAnswer();
+    if(docIds.size() == 0){
+        string response = returnNoAnswer();
+        predis->set(_queryWord,response);
+        return response;
+    }
     vector<pair<int,map<string,double>>> resultVector;
     for(auto& d:docIds)
     {
@@ -161,6 +177,7 @@ string WordQuery::doQuery()
         resultIds.push_back(re.first);
     }
     string response = createJson(resultIds,uniqueQueryWords);
+    predis->set(_queryWord,response);
     return response;
 }
 

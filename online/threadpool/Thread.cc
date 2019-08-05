@@ -1,10 +1,13 @@
 #include "../../include/Thread.h"
+#include "../../include/redis.h"
 #include <iostream>
 using std::cout;
 using std::endl;
 
 namespace wd
 {
+
+__thread Redis* predis;
 
 Thread::Thread(ThreadCallback && cb)
 : _pthid(0)
@@ -22,6 +25,8 @@ void Thread::start()
 
 void * Thread::threadFunc(void * arg)
 {
+    predis = new Redis();
+    predis->connect("127.0.0.1",6379);
 	Thread * pthread = static_cast<Thread*>(arg);
 	if(pthread)
 		pthread->_cb();

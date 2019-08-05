@@ -3,12 +3,15 @@
 #include "TcpServer.h"
 #include "MyConf.h"
 #include "WebPage.h"
+#include "redis.h"
 #include <queue>
 #include <iostream>
 #include <json/json.h>
+#include <hiredis/hiredis.h>
 #include <unordered_map>
 #include <sstream>
 #include <math.h>
+#include <pthread.h>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -17,6 +20,7 @@ using namespace std;
 namespace wd
 {
 class WebPage;
+extern __thread Redis* predis;
 class WordQuery
 {
 public:
